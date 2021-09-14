@@ -18,7 +18,6 @@
 					sendAction('done',{action:'login'});
 				} else {
 					liff.login({redirectUri:window.location.href});
-					sendAction('done',{action:'login'});
 				}
 			})
 			.catch(error => {

@@ -20,6 +20,8 @@
 	<script>
 		const urlParams = new URLSearchParams(window.location.search);				
 	    const senderDomain = urlParams.get('sender');
+		const state = urlParams.get('liff.state');
+		
 		const liffId = urlParams.get('liffId');
 		const scopeArray = urlParams.get('scope')?.split(',');
 		const login = () => {
@@ -74,7 +76,7 @@
 						const liffInfo = await getLiffInfo(scopeArray);
 						window.opener.postMessage(JSON.stringify(liffInfo),senderDomain);						
 					} else {
-						liff.login(redirectUri:"https://illuminechen.github.io");
+						liff.login(redirectUri:window.location.href);
 					}
 				})
 				.catch(error => {

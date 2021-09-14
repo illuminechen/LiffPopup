@@ -75,7 +75,7 @@
 						const liffInfo = await getLiffInfo(scopeArray);
 						window.opener.postMessage(JSON.stringify(liffInfo),senderDomain);						
 					} else {
-						liff.login(redirectUri:window.location.href);
+						liff.login({redirectUri:window.location.href});
 					}
 				})
 				.catch(error => {

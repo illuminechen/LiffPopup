@@ -7,106 +7,57 @@
 </head>
 
 <body>
-	<div id="success" style="display: none;">
-		<div><span>You Have Successfully Logged Out</span></div>
-		<button onclick="window.close()"">CLOSE</button>
-	</div>
-	<div id="already" style="display: none;">
-		<div><span>You Haven't Logged In</span></div>
-		<button onclick="window.close()">CLOSE</button>
-	</div>
-
 	<script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
 	<script>
-		let urlParams = new URLSearchParams(window.location.search);		
-	    const senderDomain = urlParams.get('sender');
-		const state = urlParams.get('liff.state');
-		if(typeof state !=='undefined' && state != null)
-			urlParams = new URLSearchParams(state);						
-		const liffId = urlParams.get('liffId');
-		const scopeArray = urlParams.get('scope')?.split(',');
 		const login = () => {
 			const liff = window.liff;						
-			liff
-				.init({
-					liffId: liffId
-				})
-				.then(async () => {
-					if (liff.isLoggedIn()) {
-						const getLiffInfo = async scopes => {
-							const info = {
-								errorObject: {}
-							};
-							// Using for-of instead forEach to deal with async loop
-							for (let scope of scopes) {
-								switch (scope) {
-									case "getOS":
-										info["os"] = liff.getOS();
-										break;
-									case "getLanguage":
-										info["language"] = liff.getLanguage();
-										break;
-									case "getVersion":
-										info["version"] = liff.getVersion();
-										break;
-									case "isInClient":
-										info["isInClient"] = liff.isInClient();
-										break;
-									case "getAccessToken":
-										info["accessToken"] = liff.getAccessToken();
-										break;
-									case "getDecodedIDToken":
-										// liff.getDecodedIDToken() Gets a Promise object containing the ID token payload.
-										// call next iteration after the promise has resolved
-										info["decodedIDToken"] = await liff.getDecodedIDToken();
-										break;
-									case "getProfile":
-										// liff.getProfile() Returns a Promise object that contains the user's profile information.
-										// This method internally calls the Social API using axios.
-										// For error handling, refer to the axios documentation
-										// call next iteration after the promise has resolved
-										info["profile"] = await liff.getProfile();
-										break;
-									default:
-										break;
-								}
-							}
-							// info is a promise
-							return info;
-						};
-						const liffInfo = await getLiffInfo(scopeArray);
-						window.opener.postMessage(JSON.stringify(liffInfo),senderDomain);						
-					} else {
-						liff.login({redirectUri:window.location.href});
-					}
-				})
-				.catch(error => {
-					const liffInfo = {
-						errorObject: error
-					};					
-					window.opener.postMessage(JSON.stringify(liffInfo),senderDomain);
-				});
+			liff.init({liffId: liffId})
+			.then(() => {
+				if (liff.isLoggedIn()) {
+					window.addEventListener('message',messageHandler);
+					sendAction('done',{action:'login'});
+				} else {
+					liff.login({redirectUri:window.location.href});
+				}
+			})
+			.catch(error => {
+				sendAction('error',{action:'login',error:error});
+			});
 		}
 
 		const logout = () => {
 			const liff = window.liff;
-			liff
-				.init({
-					liffId: liffId
-				})
-				.then(async () => {
-					if (liff.isLoggedIn()) {
-						liff.logout();
-						document.getElementById("success").style.display = "block";
-					} else {
-						document.getElementById("already").style.display = "block";
-					}
-				});
+			liff.init({liffId: liffId})
+			.then(async () => {
+				if (liff.isLoggedIn())
+					liff.logout();
+				sendAction('done',{action:'logout'});
+			});
 		}
 
-		const url = new URL(window.location.href);
-		const params = url.searchParams;
-		if (params.has("isLogout") && params.get("isLogout") === "true") {
+		const messageHandler = async (event) => {
+			if (event.origin !== senderDomain)
+				return;
+			let json = JSON.parse(event.data);
+			try
+			{
+				let res = await liff[json.action](json.param);
+				sendAction('done',{action:json.action,result:res});
+			}
+			catch(ex)
+			{
+				sendAction('error',{action:'login',error:ex});
+			}			
+		}
+		
+		const sendAction = (action, payload) => window.opener.postMessage(JSON.stringify({action:action,payload:payload}),senderDomain);		
+		
+		let urlParams = new URLSearchParams(window.location.search);		
+	    const senderDomain = urlParams.get('sender');
+		const liffId = urlParams.get('liffId');
+		const isLogout = params.has("isLogout");		
+		
+		if (isLogout) {
 			logout();
 		} else {
 			login();

@@ -42,8 +42,15 @@
 			let json = JSON.parse(event.data);
 			try
 			{
-				let res = await liff[json.action](json.param);
-				sendAction('done',{action:json.action,result:res});
+				let res;
+				if(typeof json.param ==='undefined')
+					res = await liff[json.action]();
+				else 
+					res = await liff[json.action](json.param);
+				if(typeof res === 'undefined')
+					sendAction('done',{action:json.action});
+				else 
+					sendAction('done',{action:json.action,result:res});
 			}
 			catch(ex)
 			{

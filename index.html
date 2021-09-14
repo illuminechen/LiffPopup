@@ -14,6 +14,7 @@
 			liff.init({liffId: liffId})
 			.then(() => {
 				if (liff.isLoggedIn()) {
+					window.removeEventListener('message',messageHandler);
 					window.addEventListener('message',messageHandler);
 					sendAction('done',{action:'login'});
 				} else {

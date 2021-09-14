@@ -53,10 +53,13 @@
 		
 		const sendAction = (action, payload) => window.opener.postMessage(JSON.stringify({action:action,payload:payload}),senderDomain);		
 		
-		let urlParams = new URLSearchParams(window.location.search);		
-	    const senderDomain = urlParams.get('sender');
-		const liffId = urlParams.get('liffId');
-		const isLogout = urlParams.has("isLogout");		
+		let urlParams = new URLSearchParams(window.location.search);
+		
+		const params = urlParams.has('liff.state')? new URLSearchParams(urlParams.get('liff.state')) : urlParams;
+		
+	    const senderDomain = params.get('sender');
+		const liffId = params.get('liffId');
+		const isLogout = params.has("isLogout");		
 		
 		if (isLogout) {
 			logout();

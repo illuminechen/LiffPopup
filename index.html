@@ -36,6 +36,7 @@
 		}
 
 		const messageHandler = async (event) => {
+			console.log(event);
 			if (event.origin !== senderDomain)
 				return;
 			let json = JSON.parse(event.data);

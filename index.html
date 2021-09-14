@@ -15,18 +15,15 @@
 		<div><span>You Haven't Logged In</span></div>
 		<button onclick="window.close()">CLOSE</button>
 	</div>
-	<script>
-		// Set document.domain to solve CORS problem
-		//document.domain = "https://n-t7usm3e7gerahaur4qpdztayfk2cinygcs7nrdq-1lu-script.googleusercontent.com";
-	</script>
+
 	<script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
 	<script>
+		const urlParams = new URLSearchParams(window.location.search);				
+	    const senderDomain = urlParams.get('sender');
+		const liffId = urlParams.get('liffId');
+		const scopeArray = urlParams.get('scope').split(',');
 		const login = () => {
-			const liff = window.liff;
-			const liffWeb = window.opener.liffWeb;
-			const liffId = liffWeb.liffId;
-			const scopeArray = liffWeb.scopeArray;
-      console.log(liffWeb);
+			const liff = window.liff;						
 			liff
 				.init({
 					liffId: liffId
@@ -75,8 +72,7 @@
 							return info;
 						};
 						const liffInfo = await getLiffInfo(scopeArray);
-            console.log('congra');
-						liffWeb.setLiffInfo(liffInfo);
+						window.opener.postMessage(JSON.stringify(liffInfo),senderDomain);						
 					} else {
 						liff.login();
 					}
@@ -84,17 +80,13 @@
 				.catch(error => {
 					const liffInfo = {
 						errorObject: error
-					};
-          console.log('congra');
-					liffWeb.setLiffInfo(liffInfo);
+					};					
+					window.opener.postMessage(JSON.stringify(liffInfo),senderDomain);
 				});
 		}
 
 		const logout = () => {
 			const liff = window.liff;
-			const liffWeb = window.opener.liffWeb;
-			const liffId = liffWeb.liffId;
-
 			liff
 				.init({
 					liffId: liffId

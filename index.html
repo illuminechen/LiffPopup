@@ -21,7 +21,7 @@
 		const urlParams = new URLSearchParams(window.location.search);				
 	    const senderDomain = urlParams.get('sender');
 		const liffId = urlParams.get('liffId');
-		const scopeArray = urlParams.get('scope').split(',');
+		const scopeArray = urlParams.get('scope')?.split(',');
 		const login = () => {
 			const liff = window.liff;						
 			liff

@@ -55,7 +55,7 @@
 		let urlParams = new URLSearchParams(window.location.search);		
 	    const senderDomain = urlParams.get('sender');
 		const liffId = urlParams.get('liffId');
-		const isLogout = params.has("isLogout");		
+		const isLogout = urlParams.has("isLogout");		
 		
 		if (isLogout) {
 			logout();
